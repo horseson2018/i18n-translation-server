@@ -8,34 +8,12 @@ module.exports = {
     // Path configuration
     localesPath: path.join(__dirname, 'public/locales'),
     staticPath: path.join(__dirname, 'public'),
-
-    // Language configuration
-    languages: [
-        'zh',      // Chinese (Simplified)
-        'en',      // English
-        'zh-TW',   // Chinese (Traditional)
-        'de',      // German
-        'es',      // Spanish
-        'fr',      // French
-        'id',      // Indonesian
-        'ja',      // Japanese
-        'ko',      // Korean
-        'ms',      // Malay
-        'pt',      // Portuguese
-        'ru',      // Russian
-        'th',      // Thai
-        'vi',      // Vietnamese
-    ],
-
-    // Translation file names (without .json extension)
-    translationFiles: [
-        'common',
-        'home',
-        'about',
-        'contact',
-        'footer',
-        'header',
-    ],
+    
+    // Note: Languages and translation files are auto-discovered from the localesPath directory
+    // The server will automatically scan localesPath and detect:
+    // - languages: All subdirectories in localesPath (e.g., zh, en, fr)
+    // - translationFiles: All .json files found in language directories (e.g., common, home, about)
+    // No manual configuration needed!
 
     // Auto-open browser on server start
     autoOpenBrowser: true,

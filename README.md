@@ -57,8 +57,10 @@ module.exports = {
     host: 'localhost',
     localesPath: path.join(__dirname, 'public/locales'),
     staticPath: path.join(__dirname, 'public'),
-    languages: ['zh', 'en', 'de', 'es', 'fr', 'ja', 'ko'],
-    translationFiles: ['common', 'home', 'about'],
+    
+    // Languages and translation files are auto-discovered from localesPath
+    // The server will automatically scan and detect all languages and files
+    
     autoOpenBrowser: true,
     translation: {
         apiUrl: 'https://your-api-url.com/v1/chat/completions',
@@ -244,9 +246,7 @@ const TranslationServer = require('i18n-translation-server');
 const config = {
     port: 3001,
     host: 'localhost',
-    localesPath: './public/locales',
-    languages: ['zh', 'en', 'es'],
-    translationFiles: ['common', 'home'],
+    localesPath: './public/locales', // Auto-discovers languages and files
     translation: {
         apiUrl: 'your_api_url',
         apiKey: 'your_api_key',

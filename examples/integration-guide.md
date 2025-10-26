@@ -36,8 +36,7 @@ module.exports = {
     port: 3001,
     host: 'localhost',
     localesPath: path.join(__dirname, 'public/locales'),
-    languages: ['zh', 'en', 'es', 'fr'],
-    translationFiles: ['common', 'home', 'about'],
+    // Languages and files are auto-discovered from localesPath
     translation: {
         apiUrl: 'https://your-api-url.com/v1/chat/completions',
         apiKey: 'Bearer your_api_key_here',
@@ -89,8 +88,7 @@ const config = {
     port: 3001,
     localesPath: path.join(__dirname, '../public/locales'),
     staticPath: path.join(__dirname, '../public'),
-    languages: ['zh', 'en', 'es'],
-    translationFiles: ['common', 'home'],
+    // Languages and files are auto-discovered from localesPath
     translation: {
         apiUrl: 'https://your-api-url.com/v1/chat/completions',
         apiKey: 'Bearer your_api_key_here',
@@ -143,16 +141,11 @@ module.exports = {
     host: 'localhost',
     localesPath: path.join(__dirname, 'public/locales'),
     staticPath: path.join(__dirname, 'public'),
-    languages: [
-        'zh', 'en', 'zh-TW', 'de', 'es', 'fr',
-        'id', 'ja', 'ko', 'ms', 'pt', 'ru', 'th', 'vi'
-    ],
-    translationFiles: [
-        'common', 'contact', 'credits', 'faq', 'footer',
-        'home', 'manual', 'nano', 'pricing', 'settings',
-        'subscriptionModal', 'tool', 'upload', 'sora',
-        'google-veo3.1', 'halloween'
-    ],
+    
+    // Languages and translation files are auto-discovered from localesPath
+    // No need to manually list: zh, en, zh-TW, de, es, fr, id, ja, ko, ms, pt, ru, th, vi
+    // No need to manually list files: common, contact, credits, faq, footer, home, etc.
+    
     autoOpenBrowser: true,
     translation: {
         apiUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',

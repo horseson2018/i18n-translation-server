@@ -5,10 +5,13 @@ const path = require('path');
 const config = {
     port: 3001,
     host: 'localhost',
+    
+    // The server will automatically scan localesPath to discover:
+    // - languages: All subdirectories (e.g., zh, en, es, fr, de)
+    // - translationFiles: All .json files found (e.g., common, home, about)
     localesPath: path.join(__dirname, 'public/locales'),
     staticPath: path.join(__dirname, 'public'),
-    languages: ['zh', 'en', 'es', 'fr', 'de'],
-    translationFiles: ['common', 'home', 'about'],
+    
     autoOpenBrowser: false,
     translation: {
         // You can set these via environment variables or directly here
