@@ -27,15 +27,32 @@ program
     .action(async (options) => {
         let config = {};
 
-        // Load config file if provided
+        // Determine config file path
+        let configPath;
         if (options.config) {
-            const configPath = path.resolve(process.cwd(), options.config);
+            // Use specified config file
+            configPath = path.resolve(process.cwd(), options.config);
+        } else {
+            // Auto-detect config file in current directory
+            const defaultConfigPath = path.join(process.cwd(), 'i18n.config.js');
+            if (fs.existsSync(defaultConfigPath)) {
+                configPath = defaultConfigPath;
+            }
+        }
+
+        // Load config file
+        if (configPath) {
             if (fs.existsSync(configPath)) {
                 console.log(`📄 Loading config from: ${configPath}`);
                 config = require(configPath);
             } else {
-                console.warn(`⚠️  Config file not found: ${configPath}`);
+                console.error(`❌ Config file not found: ${configPath}`);
+                console.log('\n💡 Tip: Run "i18n-server init" to create a config file');
+                process.exit(1);
             }
+        } else {
+            console.log('⚠️  No config file found, using default settings');
+            console.log('💡 Tip: Run "i18n-server init" to create i18n.config.js');
         }
 
         // Override with command line options

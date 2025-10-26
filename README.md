@@ -72,14 +72,17 @@ module.exports = {
 ### 3. Start the Server
 
 ```bash
+# Auto-detect i18n.config.js in current directory
+i18n-server start
+
+# Or specify a config file explicitly
 i18n-server start -c i18n.config.js
-```
 
-Or with inline options:
-
-```bash
+# Or use inline options
 i18n-server start -p 3001 -l public/locales
 ```
+
+**Note:** The server automatically looks for `i18n.config.js` in the current directory if no config file is specified.
 
 ### 4. Open the Web UI
 
