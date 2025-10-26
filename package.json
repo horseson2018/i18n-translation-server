@@ -3,7 +3,7 @@
     "author": "horseson2018",
     "license": "MIT",
     "homepage": "https://github.com/horseson2018/i18n-translation-server",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "description": "A powerful i18n translation management server with automatic translation, API support, and web UI",
     "main": "lib/server.js",
     "bin": {
