@@ -1,45 +1,45 @@
 {
-  "name": "i18n-translation-server",
-  "version": "1.0.0",
-  "description": "A powerful i18n translation management server with automatic translation, API support, and web UI",
-  "main": "lib/server.js",
-  "bin": {
-    "i18n-server": "./bin/i18n-server.js"
-  },
-  "scripts": {
-    "start": "node bin/i18n-server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "i18n",
-    "internationalization",
-    "translation",
-    "localization",
-    "l10n",
-    "translation-server",
-    "translation-management",
-    "api",
-    "express"
-  ],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.18.0",
-    "cors": "^2.8.5",
-    "axios": "^1.6.0",
-    "archiver": "^6.0.0",
-    "dotenv": "^16.3.0",
-    "commander": "^11.1.0"
-  },
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "bugs": {
-    "url": ""
-  },
-  "homepage": ""
+    "name": "i18n-translation-server",
+    "author": "horseson2018",
+    "license": "MIT",
+    "homepage": "https://github.com/horseson2018/i18n-translation-server",
+    "version": "1.0.0",
+    "description": "A powerful i18n translation management server with automatic translation, API support, and web UI",
+    "main": "lib/server.js",
+    "bin": {
+        "i18n-server": "./bin/i18n-server.js"
+    },
+    "scripts": {
+        "start": "node bin/i18n-server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "i18n",
+        "internationalization",
+        "translation",
+        "localization",
+        "l10n",
+        "translation-server",
+        "translation-management",
+        "api",
+        "express"
+    ],
+    "dependencies": {
+        "express": "^4.18.0",
+        "cors": "^2.8.5",
+        "axios": "^1.6.0",
+        "archiver": "^6.0.0",
+        "dotenv": "^16.3.0",
+        "commander": "^11.1.0"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/horseson2018/i18n-translation-server.git"
+    },
+    "bugs": {
+        "url": "https://github.com/horseson2018/i18n-translation-server/issues"
+    }
 }
