@@ -5,17 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.2] - 2025-10-26
+## [1.1.0] - 2025-10-26
+
+### Added
+- **`.env` file generation in init command** - The `i18n-server init` command now automatically creates a `.env` file with template configuration for translation API credentials
 
 ### Changed
 - **Auto-discovery of languages and translation files** - The server now automatically scans the `localesPath` directory to discover all available languages and translation files
 - No need to manually configure `languages` and `translationFiles` in config anymore
 - Simplified configuration - just specify `localesPath` and everything is detected automatically
+- Config file now uses environment variables by default for API credentials
 
 ### Improved
-- Better developer experience with automatic detection
+- Better developer experience with automatic detection and `.env` file setup
 - Reduced configuration boilerplate
 - More maintainable - adding new languages or files no longer requires config updates
+- Better security practices with environment variables for sensitive data
 
 ## [1.0.0] - 2024-01-XX
 
