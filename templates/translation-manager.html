@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
@@ -12,9 +12,8 @@
             }
 
             body {
-                font-family:
-                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                    sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, sans-serif;
                 background: #f5f5f5;
                 color: #333;
             }
@@ -356,12 +355,27 @@
                     <button onclick="addTranslation()" class="secondary">
                         ➕ 添加翻译
                     </button>
-                    <button onclick="showAddFileModal()" class="secondary"
-                        style="background: #ff9800; border-color: #ff9800;">
+                    <button
+                        onclick="showAddFileModal()"
+                        class="secondary"
+                        style="background: #ff9800; border-color: #ff9800"
+                    >
                         📄 新增文件
                     </button>
                     <button onclick="batchTranslate()" class="secondary">
                         🤖 批量翻译
+                    </button>
+                    <button
+                        id="batchDeleteBtn"
+                        onclick="batchDelete()"
+                        class="secondary"
+                        style="
+                            background: #ff4d4f;
+                            border-color: #ff4d4f;
+                            display: none;
+                        "
+                    >
+                        🗑️ 批量删除 (<span id="selectedCount">0</span>)
                     </button>
                     <button onclick="refreshData()">♻️ 刷新数据</button>
                     <button onclick="exportData()" class="secondary">
@@ -376,6 +390,14 @@
                 <table>
                     <thead>
                         <tr>
+                            <th style="width: 40px">
+                                <input
+                                    type="checkbox"
+                                    id="selectAll"
+                                    onchange="toggleSelectAll()"
+                                    title="全选/取消全选"
+                                />
+                            </th>
                             <th>Key</th>
                             <th>文件</th>
                             <th>中文</th>
@@ -394,7 +416,7 @@
                     </thead>
                     <tbody id="translationsTable">
                         <tr>
-                            <td colspan="6" class="loading">加载中...</td>
+                            <td colspan="7" class="loading">加载中...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -482,18 +504,24 @@
             <div class="modal-content" style="max-width: 500px">
                 <div class="modal-header">
                     <h3>新增翻译文件</h3>
-                    <span class="close" onclick="closeAddFileModal()">&times;</span>
+                    <span class="close" onclick="closeAddFileModal()"
+                        >&times;</span
+                    >
                 </div>
                 <form id="addFileForm">
                     <div class="form-group">
                         <label for="newFileName">文件名:</label>
-                        <input type="text" id="newFileName" required 
-                            placeholder="例如: new-feature" />
-                        <small style="color: #999; font-size: 12px;">
+                        <input
+                            type="text"
+                            id="newFileName"
+                            required
+                            placeholder="例如: new-feature"
+                        />
+                        <small style="color: #999; font-size: 12px">
                             将在所有语言文件夹下创建对应的 JSON 文件
                         </small>
                     </div>
-                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <div style="margin-top: 20px; display: flex; gap: 10px">
                         <button type="button" onclick="closeAddFileModal()">
                             取消
                         </button>
@@ -561,58 +589,58 @@
         </div>
 
         <script>
-            const API_BASE = "/api";
-            let allTranslations = [];
-            let filteredTranslations = [];
-            let languages = [];
-            let files = [];
-            let currentEditId = null;
-            let selectedHeaderLanguage = ""; // 表头选中的语言
+            const API_BASE = "/api"
+            let allTranslations = []
+            let filteredTranslations = []
+            let languages = []
+            let files = []
+            let currentEditId = null
+            let selectedHeaderLanguage = "" // 表头选中的语言
 
             // 性能优化：搜索结果缓存
-            const searchCache = new Map();
-            const MAX_CACHE_SIZE = 50;
+            const searchCache = new Map()
+            const MAX_CACHE_SIZE = 50
 
             // 分页相关变量
-            let currentPage = 1;
-            let pageSize = 50;
-            let totalPages = 1;
+            let currentPage = 1
+            let pageSize = 50
+            let totalPages = 1
 
             // 初始化
             document.addEventListener("DOMContentLoaded", function () {
-                loadInitialData();
+                loadInitialData()
 
                 // 搜索框实时搜索事件（使用防抖）
                 document
                     .getElementById("searchInput")
-                    .addEventListener("input", debouncedFilter);
+                    .addEventListener("input", debouncedFilter)
 
                 // 搜索框回车事件（立即搜索）
                 document
                     .getElementById("searchInput")
                     .addEventListener("keypress", function (e) {
                         if (e.key === "Enter") {
-                            filterTranslations();
+                            filterTranslations()
                         }
-                    });
+                    })
 
                 // 过滤器变化事件
                 document
                     .getElementById("fileFilter")
-                    .addEventListener("change", filterTranslations);
+                    .addEventListener("change", filterTranslations)
 
                 document
                     .getElementById("languageFilter")
-                    .addEventListener("change", filterTranslations);
+                    .addEventListener("change", filterTranslations)
 
                 // 表单提交事件
                 document
                     .getElementById("editForm")
                     .addEventListener("submit", function (e) {
-                        e.preventDefault();
-                        saveTranslation();
-                    });
-            });
+                        e.preventDefault()
+                        saveTranslation()
+                    })
+            })
 
             // 加载翻译数据
             async function loadTranslations() {
@@ -623,23 +651,23 @@
                         {
                             method: "POST",
                         }
-                    );
+                    )
 
                     if (!refreshRes.ok) {
-                        throw new Error("刷新缓存失败");
+                        throw new Error("刷新缓存失败")
                     }
 
                     // 清除前端搜索缓存
-                    searchCache.clear();
+                    searchCache.clear()
 
                     // 然后获取最新的翻译数据
                     const translationsRes = await fetch(
                         `${API_BASE}/translations`
-                    );
-                    allTranslations = await translationsRes.json();
-                    filterTranslations();
+                    )
+                    allTranslations = await translationsRes.json()
+                    filterTranslations()
                 } catch (error) {
-                    showMessage("加载翻译数据失败: " + error.message, "error");
+                    showMessage("加载翻译数据失败: " + error.message, "error")
                 }
             }
 
@@ -651,65 +679,63 @@
                             fetch(`${API_BASE}/translations`),
                             fetch(`${API_BASE}/languages`),
                             fetch(`${API_BASE}/files`),
-                        ]);
+                        ])
 
-                    allTranslations = await translationsRes.json();
-                    languages = await languagesRes.json();
-                    files = await filesRes.json();
+                    allTranslations = await translationsRes.json()
+                    languages = await languagesRes.json()
+                    files = await filesRes.json()
 
-                    updateStats();
-                    populateFilters();
-                    filteredTranslations = allTranslations;
-                    updatePagination();
-                    renderCurrentPage();
+                    updateStats()
+                    populateFilters()
+                    filteredTranslations = allTranslations
+                    updatePagination()
+                    renderCurrentPage()
                 } catch (error) {
-                    showMessage("加载数据失败: " + error.message, "error");
+                    showMessage("加载数据失败: " + error.message, "error")
                 }
             }
 
             // 更新统计信息
             function updateStats() {
                 document.getElementById("totalTranslations").textContent =
-                    allTranslations.length;
+                    allTranslations.length
                 document.getElementById("totalLanguages").textContent =
-                    languages.length;
-                document.getElementById("totalFiles").textContent =
-                    files.length;
+                    languages.length
+                document.getElementById("totalFiles").textContent = files.length
             }
 
             // 填充过滤器选项
             function populateFilters() {
-                const fileFilter = document.getElementById("fileFilter");
-                const languageFilter =
-                    document.getElementById("languageFilter");
-                const editFileSelect = document.getElementById("editFile");
+                const fileFilter = document.getElementById("fileFilter")
+                const languageFilter = document.getElementById("languageFilter")
+                const editFileSelect = document.getElementById("editFile")
                 const headerLanguageSelect = document.getElementById(
                     "headerLanguageSelect"
-                );
+                )
 
                 // 清空现有选项
-                fileFilter.innerHTML = '<option value="">所有文件</option>';
-                languageFilter.innerHTML = '<option value="">所有语言</option>';
-                editFileSelect.innerHTML = "";
+                fileFilter.innerHTML = '<option value="">所有文件</option>'
+                languageFilter.innerHTML = '<option value="">所有语言</option>'
+                editFileSelect.innerHTML = ""
                 headerLanguageSelect.innerHTML =
-                    '<option value="">选择语言...</option>';
+                    '<option value="">选择语言...</option>'
 
                 // 添加文件选项
                 files.forEach((file) => {
-                    fileFilter.innerHTML += `<option value="${file}">${file}</option>`;
-                    editFileSelect.innerHTML += `<option value="${file}">${file}</option>`;
-                });
+                    fileFilter.innerHTML += `<option value="${file}">${file}</option>`
+                    editFileSelect.innerHTML += `<option value="${file}">${file}</option>`
+                })
 
                 // 添加语言选项
                 languages.forEach((lang) => {
-                    const langName = getLanguageName(lang);
-                    languageFilter.innerHTML += `<option value="${lang}">${langName}</option>`;
+                    const langName = getLanguageName(lang)
+                    languageFilter.innerHTML += `<option value="${lang}">${langName}</option>`
 
                     // 为表头语言选择器添加除中文和英文外的其他语言
                     if (lang !== "zh" && lang !== "en") {
-                        headerLanguageSelect.innerHTML += `<option value="${lang}">${langName}</option>`;
+                        headerLanguageSelect.innerHTML += `<option value="${lang}">${langName}</option>`
                     }
-                });
+                })
             }
 
             // 获取语言显示名称
@@ -729,135 +755,153 @@
                     ru: "Русский",
                     th: "ไทย",
                     vi: "Tiếng Việt",
-                };
-                return names[code] || code;
+                }
+                return names[code] || code
             }
 
             // 分页相关函数
             function updatePagination() {
-                totalPages = Math.ceil(filteredTranslations.length / pageSize);
+                totalPages = Math.ceil(filteredTranslations.length / pageSize)
                 if (currentPage > totalPages) {
-                    currentPage = Math.max(1, totalPages);
+                    currentPage = Math.max(1, totalPages)
                 }
 
                 // 更新分页信息
-                const start = (currentPage - 1) * pageSize + 1;
+                const start = (currentPage - 1) * pageSize + 1
                 const end = Math.min(
                     currentPage * pageSize,
                     filteredTranslations.length
-                );
-                document.getElementById("paginationInfo").textContent =
-                    `显示第 ${start}-${end} 条，共 ${filteredTranslations.length} 条记录`;
-                document.getElementById("pageInfo").textContent =
-                    ` ${currentPage} / ${totalPages}`;
+                )
+                document.getElementById(
+                    "paginationInfo"
+                ).textContent = `显示第 ${start}-${end} 条，共 ${filteredTranslations.length} 条记录`
+                document.getElementById(
+                    "pageInfo"
+                ).textContent = ` ${currentPage} / ${totalPages}`
 
                 // 更新按钮状态
                 document.getElementById("firstPageBtn").disabled =
-                    currentPage === 1;
+                    currentPage === 1
                 document.getElementById("prevPageBtn").disabled =
-                    currentPage === 1;
+                    currentPage === 1
                 document.getElementById("nextPageBtn").disabled =
-                    currentPage === totalPages;
+                    currentPage === totalPages
                 document.getElementById("lastPageBtn").disabled =
-                    currentPage === totalPages;
+                    currentPage === totalPages
             }
 
             function goToPage(page) {
                 if (page >= 1 && page <= totalPages) {
-                    currentPage = page;
-                    updatePagination();
-                    renderCurrentPage();
+                    currentPage = page
+                    updatePagination()
+                    renderCurrentPage()
                 }
             }
 
             function changePageSize() {
                 pageSize = parseInt(
                     document.getElementById("pageSizeSelect").value
-                );
-                currentPage = 1;
-                updatePagination();
-                renderCurrentPage();
+                )
+                currentPage = 1
+                updatePagination()
+                renderCurrentPage()
             }
 
             function renderCurrentPage() {
-                const start = (currentPage - 1) * pageSize;
-                const end = start + pageSize;
-                const pageData = filteredTranslations.slice(start, end);
-                renderTranslations(pageData);
+                const start = (currentPage - 1) * pageSize
+                const end = start + pageSize
+                const pageData = filteredTranslations.slice(start, end)
+                renderTranslations(pageData)
             }
 
             // 显示加载状态
             function showLoadingState() {
-                const tbody = document.getElementById("translationsTable");
+                const tbody = document.getElementById("translationsTable")
                 tbody.innerHTML =
-                    '<tr><td colspan="6" class="loading">正在加载...</td></tr>';
+                    '<tr><td colspan="7" class="loading">正在加载...</td></tr>'
             }
 
             // 渲染翻译表格
             function renderTranslations(translations) {
-                const tbody = document.getElementById("translationsTable");
+                const tbody = document.getElementById("translationsTable")
 
                 if (translations.length === 0) {
                     tbody.innerHTML =
-                        '<tr><td colspan="6" class="loading">没有找到翻译数据</td></tr>';
-                    return;
+                        '<tr><td colspan="7" class="loading">没有找到翻译数据</td></tr>'
+                    return
                 }
 
                 tbody.innerHTML = translations
                     .map((item) => {
                         // 获取表头选中语言的翻译内容
-                        let otherLangContent = "-";
+                        let otherLangContent = "-"
                         if (
                             selectedHeaderLanguage &&
                             item.translations[selectedHeaderLanguage]
                         ) {
                             otherLangContent =
-                                item.translations[selectedHeaderLanguage];
+                                item.translations[selectedHeaderLanguage]
                         } else if (selectedHeaderLanguage) {
-                            otherLangContent = "(未翻译)";
+                            otherLangContent = "(未翻译)"
                         }
 
                         return `
-                <tr>
+                <tr data-id="${item.id}">
+                    <td>
+                        <input
+                            type="checkbox"
+                            class="row-checkbox"
+                            value="${item.id}"
+                            onchange="updateSelectedCount()"
+                        />
+                    </td>
                     <td><code class="key-cell">${item.key}</code></td>
                     <td><span class="file-badge">${item.file}</span></td>
-                    <td class="translation-cell" title="${item.translations.zh || ""}">${item.translations.zh || "-"}</td>
-                    <td class="translation-cell" title="${item.translations.en || ""}">${item.translations.en || "-"}</td>
+                    <td class="translation-cell" title="${
+                        item.translations.zh || ""
+                    }">${item.translations.zh || "-"}</td>
+                    <td class="translation-cell" title="${
+                        item.translations.en || ""
+                    }">${item.translations.en || "-"}</td>
                     <td class="translation-cell" title="${otherLangContent}">${otherLangContent}</td>
                     <td>
                         <div class="actions">
-                            <button class="btn-small" onclick="editTranslation(${item.id})">编辑</button>
-                            <button class="btn-small danger" onclick="deleteTranslation(${item.id})">删除</button>
+                            <button class="btn-small" onclick="editTranslation(${
+                                item.id
+                            })">编辑</button>
+                            <button class="btn-small danger" onclick="deleteTranslation(${
+                                item.id
+                            })">删除</button>
                         </div>
                     </td>
                 </tr>
-            `;
+            `
                     })
-                    .join("");
+                    .join("")
             }
 
             // 表头语言选择变化处理
             function changeHeaderLanguage() {
                 selectedHeaderLanguage = document.getElementById(
                     "headerLanguageSelect"
-                ).value;
+                ).value
                 // 清理缓存，因为显示内容发生了变化
-                searchCache.clear();
+                searchCache.clear()
                 // 重新渲染当前页面
-                renderCurrentPage();
+                renderCurrentPage()
             }
 
             // 防抖函数，优化搜索性能
             function debounce(func, wait) {
-                let timeout;
+                let timeout
                 return function executedFunction(...args) {
                     const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
+                        clearTimeout(timeout)
+                        func(...args)
+                    }
+                    clearTimeout(timeout)
+                    timeout = setTimeout(later, wait)
+                }
             }
 
             // 生成缓存键
@@ -866,14 +910,14 @@
                 selectedFile,
                 selectedLanguage
             ) {
-                return `${searchTerm}|${selectedFile}|${selectedLanguage}`;
+                return `${searchTerm}|${selectedFile}|${selectedLanguage}`
             }
 
             // 清理缓存（LRU策略）
             function cleanCache() {
                 if (searchCache.size >= MAX_CACHE_SIZE) {
-                    const firstKey = searchCache.keys().next().value;
-                    searchCache.delete(firstKey);
+                    const firstKey = searchCache.keys().next().value
+                    searchCache.delete(firstKey)
                 }
             }
 
@@ -881,40 +925,40 @@
             function filterTranslations() {
                 const searchTerm = document
                     .getElementById("searchInput")
-                    .value.toLowerCase();
-                const selectedFile =
-                    document.getElementById("fileFilter").value;
+                    .value.toLowerCase()
+                const selectedFile = document.getElementById("fileFilter").value
                 const selectedLanguage =
-                    document.getElementById("languageFilter").value;
+                    document.getElementById("languageFilter").value
 
                 // 生成缓存键
                 const cacheKey = generateCacheKey(
                     searchTerm,
                     selectedFile,
                     selectedLanguage
-                );
+                )
 
                 // 检查缓存
                 if (searchCache.has(cacheKey)) {
-                    filteredTranslations = searchCache.get(cacheKey);
-                    currentPage = 1;
-                    updatePagination();
-                    renderCurrentPage();
-                    document.getElementById("translationCount").textContent =
-                        `共找到 ${filteredTranslations.length} 条翻译`;
-                    return;
+                    filteredTranslations = searchCache.get(cacheKey)
+                    // 不重置页码，保持当前页
+                    updatePagination()
+                    renderCurrentPage()
+                    document.getElementById(
+                        "translationCount"
+                    ).textContent = `共找到 ${filteredTranslations.length} 条翻译`
+                    return
                 }
 
                 // 显示加载状态（对于大数据集）
                 if (allTranslations.length > 1000) {
-                    showLoadingState();
+                    showLoadingState()
                 }
 
                 // 使用 requestAnimationFrame 来避免阻塞 UI
                 requestAnimationFrame(() => {
                     // 如果没有任何过滤条件，直接显示所有数据
                     if (!searchTerm && !selectedFile && !selectedLanguage) {
-                        filteredTranslations = allTranslations;
+                        filteredTranslations = allTranslations
                     } else {
                         // 使用更高效的过滤逻辑
                         filteredTranslations = allTranslations.filter(
@@ -924,18 +968,18 @@
                                     selectedFile &&
                                     item.file !== selectedFile
                                 ) {
-                                    return false;
+                                    return false
                                 }
 
                                 // 语言过滤
                                 if (selectedLanguage) {
                                     const langTranslation =
-                                        item.translations[selectedLanguage];
+                                        item.translations[selectedLanguage]
                                     if (
                                         !langTranslation ||
                                         langTranslation.trim() === ""
                                     ) {
-                                        return false;
+                                        return false
                                     }
                                 }
 
@@ -947,7 +991,7 @@
                                             .toLowerCase()
                                             .includes(searchTerm)
                                     ) {
-                                        return true;
+                                        return true
                                     }
 
                                     // 然后检查翻译内容
@@ -960,109 +1004,112 @@
                                                 .toLowerCase()
                                                 .includes(searchTerm)
                                         ) {
-                                            return true;
+                                            return true
                                         }
                                     }
-                                    return false;
+                                    return false
                                 }
 
-                                return true;
+                                return true
                             }
-                        );
+                        )
                     }
 
                     // 缓存结果
-                    cleanCache();
-                    searchCache.set(cacheKey, [...filteredTranslations]);
+                    cleanCache()
+                    searchCache.set(cacheKey, [...filteredTranslations])
 
-                    // 重置到第一页
-                    currentPage = 1;
-                    updatePagination();
-                    renderCurrentPage();
+                    // 不重置页码，保持当前页
+                    updatePagination()
+                    renderCurrentPage()
 
-                    document.getElementById("translationCount").textContent =
-                        `共找到 ${filteredTranslations.length} 条翻译`;
-                });
+                    document.getElementById(
+                        "translationCount"
+                    ).textContent = `共找到 ${filteredTranslations.length} 条翻译`
+                })
             }
 
             // 创建防抖版本的过滤函数
-            const debouncedFilter = debounce(filterTranslations, 300);
+            const debouncedFilter = debounce(filterTranslations, 300)
 
             // 清除筛选
             function clearFilters() {
-                document.getElementById("searchInput").value = "";
-                document.getElementById("fileFilter").value = "";
-                document.getElementById("languageFilter").value = "";
-                filteredTranslations = allTranslations;
-                currentPage = 1;
-                updatePagination();
-                renderCurrentPage();
-                document.getElementById("translationCount").textContent =
-                    `共找到 ${filteredTranslations.length} 条翻译`;
+                document.getElementById("searchInput").value = ""
+                document.getElementById("fileFilter").value = ""
+                document.getElementById("languageFilter").value = ""
+                filteredTranslations = allTranslations
+                currentPage = 1
+                updatePagination()
+                renderCurrentPage()
+                document.getElementById(
+                    "translationCount"
+                ).textContent = `共找到 ${filteredTranslations.length} 条翻译`
             }
 
             // 添加翻译
             function addTranslation() {
-                currentEditId = null;
-                document.getElementById("modalTitle").textContent = "添加翻译";
-                document.getElementById("editKey").value = "";
-                document.getElementById("editFile").value = files[0] || "";
+                currentEditId = null
+                document.getElementById("modalTitle").textContent = "添加翻译"
+                document.getElementById("editKey").value = ""
+                document.getElementById("editFile").value = files[0] || ""
 
-                generateLanguageInputs();
-                document.getElementById("editModal").style.display = "block";
+                generateLanguageInputs()
+                document.getElementById("editModal").style.display = "block"
             }
 
             // 编辑翻译
             function editTranslation(id) {
-                const translation = allTranslations.find((t) => t.id === id);
-                if (!translation) return;
+                const translation = allTranslations.find((t) => t.id === id)
+                if (!translation) return
 
-                currentEditId = id;
-                document.getElementById("modalTitle").textContent = "编辑翻译";
-                document.getElementById("editKey").value = translation.key;
-                document.getElementById("editFile").value = translation.file;
+                currentEditId = id
+                document.getElementById("modalTitle").textContent = "编辑翻译"
+                document.getElementById("editKey").value = translation.key
+                document.getElementById("editFile").value = translation.file
 
-                generateLanguageInputs(translation.translations);
-                document.getElementById("editModal").style.display = "block";
+                generateLanguageInputs(translation.translations)
+                document.getElementById("editModal").style.display = "block"
             }
 
             // 生成语言输入框
             function generateLanguageInputs(translations = {}) {
-                const container = document.getElementById("languageInputs");
+                const container = document.getElementById("languageInputs")
                 container.innerHTML = languages
                     .map(
                         (lang) => `
                 <div class="form-group">
                     <label for="lang-${lang}">${getLanguageName(lang)}:</label>
-                    <textarea id="lang-${lang}" data-lang="${lang}" placeholder="输入${getLanguageName(lang)}翻译...">${translations[lang] || ""}</textarea>
+                    <textarea id="lang-${lang}" data-lang="${lang}" placeholder="输入${getLanguageName(
+                            lang
+                        )}翻译...">${translations[lang] || ""}</textarea>
                 </div>
             `
                     )
-                    .join("");
+                    .join("")
             }
 
             // 保存翻译
             async function saveTranslation() {
-                const key = document.getElementById("editKey").value;
-                const file = document.getElementById("editFile").value;
+                const key = document.getElementById("editKey").value
+                const file = document.getElementById("editFile").value
 
-                const translations = {};
+                const translations = {}
                 languages.forEach((lang) => {
-                    const input = document.getElementById(`lang-${lang}`);
+                    const input = document.getElementById(`lang-${lang}`)
                     if (input) {
-                        translations[lang] = input.value;
+                        translations[lang] = input.value
                     }
-                });
+                })
 
                 const data = {
                     key,
                     file,
                     translations,
                     updatedAt: new Date().toISOString(),
-                };
+                }
 
                 try {
-                    let response;
+                    let response
                     if (currentEditId) {
                         // 更新现有翻译
                         response = await fetch(
@@ -1075,7 +1122,7 @@
                                     id: currentEditId,
                                 }),
                             }
-                        );
+                        )
                     } else {
                         // 添加新翻译
                         response = await fetch(`${API_BASE}/translations`, {
@@ -1086,24 +1133,24 @@
                                 id: Date.now(),
                                 createdAt: new Date().toISOString(),
                             }),
-                        });
+                        })
                     }
 
                     if (response.ok) {
-                        showMessage("翻译保存成功", "success");
-                        closeModal();
-                        refreshData();
+                        showMessage("翻译保存成功", "success")
+                        closeModal()
+                        refreshData()
                     } else {
-                        throw new Error("保存失败");
+                        throw new Error("保存失败")
                     }
                 } catch (error) {
-                    showMessage("保存翻译失败: " + error.message, "error");
+                    showMessage("保存翻译失败: " + error.message, "error")
                 }
             }
 
             // 删除翻译
             async function deleteTranslation(id) {
-                if (!confirm("确定要删除这个翻译吗？")) return;
+                if (!confirm("确定要删除这个翻译吗？")) return
 
                 try {
                     const response = await fetch(
@@ -1111,73 +1158,73 @@
                         {
                             method: "DELETE",
                         }
-                    );
+                    )
 
                     if (response.ok) {
-                        showMessage("翻译删除成功", "success");
-                        refreshData();
+                        showMessage("翻译删除成功", "success")
+                        refreshData()
                     } else {
-                        throw new Error("删除失败");
+                        throw new Error("删除失败")
                     }
                 } catch (error) {
-                    showMessage("删除翻译失败: " + error.message, "error");
+                    showMessage("删除翻译失败: " + error.message, "error")
                 }
             }
 
             // 刷新数据
             async function refreshData() {
-                showMessage("正在刷新数据...", "info");
-                await loadTranslations();
-                showMessage("数据刷新完成", "success");
+                showMessage("正在刷新数据...", "info")
+                await loadTranslations()
+                showMessage("数据刷新完成", "success")
             }
 
             // 导出数据
             async function exportData() {
                 try {
-                    showMessage("正在准备导出数据...", "info");
+                    showMessage("正在准备导出数据...", "info")
 
                     // 创建一个隐藏的链接来触发下载
-                    const link = document.createElement("a");
-                    link.href = `${API_BASE}/export-data`;
-                    link.style.display = "none";
+                    const link = document.createElement("a")
+                    link.href = `${API_BASE}/export-data`
+                    link.style.display = "none"
 
                     // 添加到页面并点击
-                    document.body.appendChild(link);
-                    link.click();
+                    document.body.appendChild(link)
+                    link.click()
 
                     // 清理
-                    document.body.removeChild(link);
+                    document.body.removeChild(link)
 
-                    showMessage("导出请求已发送，文件将自动下载", "success");
+                    showMessage("导出请求已发送，文件将自动下载", "success")
                 } catch (error) {
-                    showMessage("导出数据失败: " + error.message, "error");
+                    showMessage("导出数据失败: " + error.message, "error")
                 }
             }
 
             // 弹窗内一键翻译
             async function autoTranslateInModal() {
                 // 获取当前表单中的翻译内容
-                const currentTranslations = {};
+                const currentTranslations = {}
                 const languageInputs = document.querySelectorAll(
                     "#languageInputs textarea"
-                );
+                )
 
                 languageInputs.forEach((input) => {
-                    const lang = input.getAttribute("data-lang");
-                    const value = input.value.trim();
+                    const lang = input.getAttribute("data-lang")
+                    const value = input.value.trim()
                     if (value) {
-                        currentTranslations[lang] = value;
+                        currentTranslations[lang] = value
                     }
-                });
+                })
 
                 // 检查是否有可用的源语言
-                const availableLanguages = Object.keys(currentTranslations);
+                const availableLanguages = Object.keys(currentTranslations)
                 if (availableLanguages.length === 0) {
                     showMessage(
                         "请先输入至少一种语言的翻译内容作为源文本",
                         "error"
-                    );
-                    return;
+                    )
+                    return
                 }
 
                 // 让用户选择源语言
@@ -1185,32 +1232,34 @@
                     availableLanguages.length === 1
                         ? availableLanguages[0]
                         : prompt(
-                              `请选择源语言 (${availableLanguages.join(", ")})：`,
+                              `请选择源语言 (${availableLanguages.join(
+                                  ", "
+                              )})：`,
                               availableLanguages.includes("zh")
                                   ? "en"
                                   : availableLanguages[0]
-                          );
+                          )
 
-                if (!sourceLanguage) return;
+                if (!sourceLanguage) return
 
                 if (!currentTranslations[sourceLanguage]) {
                     showMessage(
                         `源语言 ${sourceLanguage} 的翻译内容为空`,
                         "error"
-                    );
-                    return;
+                    )
+                    return
                 }
 
-                const confirmMsg = `确定要使用 "${currentTranslations[sourceLanguage]}" 作为源文本，自动翻译到其他语言吗？`;
-                if (!confirm(confirmMsg)) return;
+                const confirmMsg = `确定要使用 "${currentTranslations[sourceLanguage]}" 作为源文本，自动翻译到其他语言吗？`
+                if (!confirm(confirmMsg)) return
 
                 try {
-                    showMessage("正在自动翻译，请稍候...", "info");
+                    showMessage("正在自动翻译，请稍候...", "info")
 
                     // 使用纯翻译API，不保存文件
                     const targetLanguages = languages.filter(
                         (lang) => lang !== sourceLanguage
-                    );
+                    )
 
                     const response = await fetch(`${API_BASE}/translate-only`, {
                         method: "POST",
@@ -1220,9 +1269,9 @@
                             sourceLanguage: sourceLanguage,
                             targetLanguages: targetLanguages,
                         }),
-                    });
+                    })
 
-                    const result = await response.json();
+                    const result = await response.json()
 
                     if (result.success) {
                         // 更新表单中的翻译内容
@@ -1230,56 +1279,58 @@
                             ([lang, translation]) => {
                                 const input = document.querySelector(
                                     `textarea[data-lang="${lang}"]`
-                                );
+                                )
                                 if (input && translation) {
-                                    input.value = translation;
+                                    input.value = translation
                                 }
                             }
-                        );
+                        )
 
                         showMessage(
-                            `自动翻译完成！翻译了 ${Object.keys(result.results).length} 种语言。点击保存按钮来保存更改。`,
+                            `自动翻译完成！翻译了 ${
+                                Object.keys(result.results).length
+                            } 种语言。点击保存按钮来保存更改。`,
                             "success"
-                        );
+                        )
 
                         if (result.errors && result.errors.length > 0) {
                             showMessage(
                                 `部分翻译失败: ${result.errors.join(", ")}`,
                                 "warning"
-                            );
+                            )
                         }
                     } else {
-                        throw new Error(result.error || "自动翻译失败");
+                        throw new Error(result.error || "自动翻译失败")
                     }
                 } catch (error) {
-                    showMessage("自动翻译失败: " + error.message, "error");
+                    showMessage("自动翻译失败: " + error.message, "error")
                 }
             }
 
             // 一键翻译（表格中的按钮）
             async function autoTranslate(id) {
-                const translation = allTranslations.find((t) => t.id === id);
-                if (!translation) return;
+                const translation = allTranslations.find((t) => t.id === id)
+                if (!translation) return
 
                 const sourceLanguage = prompt(
                     "请选择源语言 (zh, en, zh-TW 等):",
                     "zh"
-                );
-                if (!sourceLanguage) return;
+                )
+                if (!sourceLanguage) return
 
                 if (!translation.translations[sourceLanguage]) {
                     showMessage(
                         `源语言 ${sourceLanguage} 的翻译不存在`,
                         "error"
-                    );
-                    return;
+                    )
+                    return
                 }
 
-                const confirmMsg = `确定要使用 "${translation.translations[sourceLanguage]}" 作为源文本，自动翻译到其他语言吗？`;
-                if (!confirm(confirmMsg)) return;
+                const confirmMsg = `确定要使用 "${translation.translations[sourceLanguage]}" 作为源文本，自动翻译到其他语言吗？`
+                if (!confirm(confirmMsg)) return
 
                 try {
-                    showMessage("正在自动翻译，请稍候...", "success");
+                    showMessage("正在自动翻译，请稍候...", "success")
 
                     const response = await fetch(
                         `${API_BASE}/auto-translate/${id}`,
@@ -1288,27 +1339,29 @@
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ sourceLanguage }),
                         }
-                    );
+                    )
 
-                    const result = await response.json();
+                    const result = await response.json()
 
                     if (result.success) {
                         showMessage(
-                            `自动翻译完成！翻译了 ${Object.keys(result.results).length} 种语言`,
+                            `自动翻译完成！翻译了 ${
+                                Object.keys(result.results).length
+                            } 种语言`,
                             "success"
-                        );
+                        )
                         if (result.errors && result.errors.length > 0) {
                             showMessage(
                                 `部分翻译失败: ${result.errors.join(", ")}`,
                                 "error"
-                            );
+                            )
                         }
-                        refreshData();
+                        refreshData()
                     } else {
-                        throw new Error(result.error || "自动翻译失败");
+                        throw new Error(result.error || "自动翻译失败")
                     }
                 } catch (error) {
-                    showMessage("自动翻译失败: " + error.message, "error");
+                    showMessage("自动翻译失败: " + error.message, "error")
                 }
             }
 
@@ -1317,49 +1370,49 @@
                 const sourceLanguage = prompt(
                     "请选择源语言 (zh, en, zh-TW 等):",
                     "zh"
-                );
-                if (!sourceLanguage) return;
+                )
+                if (!sourceLanguage) return
 
                 const targetLanguagesInput = prompt(
                     "请输入目标语言，用逗号分隔 (留空则翻译到所有其他语言):",
                     ""
-                );
+                )
                 const targetLanguages = targetLanguagesInput
                     ? targetLanguagesInput.split(",").map((lang) => lang.trim())
-                    : null;
+                    : null
 
                 // 获取当前显示的翻译ID列表
                 const visibleTranslations = document.querySelectorAll(
                     "#translationsTable tr"
-                );
-                const ids = [];
+                )
+                const ids = []
 
                 visibleTranslations.forEach((row) => {
                     const editBtn = row.querySelector(
                         'button[onclick*="editTranslation"]'
-                    );
+                    )
                     if (editBtn) {
-                        const onclick = editBtn.getAttribute("onclick");
+                        const onclick = editBtn.getAttribute("onclick")
                         const id = onclick.match(
                             /editTranslation\((\d+)\)/
-                        )?.[1];
-                        if (id) ids.push(parseInt(id));
+                        )?.[1]
+                        if (id) ids.push(parseInt(id))
                     }
-                });
+                })
 
                 if (ids.length === 0) {
-                    showMessage("没有找到可翻译的条目", "error");
-                    return;
+                    showMessage("没有找到可翻译的条目", "error")
+                    return
                 }
 
-                const confirmMsg = `确定要批量翻译 ${ids.length} 个条目吗？这可能需要较长时间。`;
-                if (!confirm(confirmMsg)) return;
+                const confirmMsg = `确定要批量翻译 ${ids.length} 个条目吗？这可能需要较长时间。`
+                if (!confirm(confirmMsg)) return
 
                 try {
                     showMessage(
                         `正在批量翻译 ${ids.length} 个条目，请耐心等待...`,
                         "success"
-                    );
+                    )
 
                     const response = await fetch(
                         `${API_BASE}/batch-translate`,
@@ -1372,84 +1425,88 @@
                                 targetLanguages,
                             }),
                         }
-                    );
+                    )
 
-                    const result = await response.json();
+                    const result = await response.json()
 
                     if (result.success) {
                         showMessage(
                             `批量翻译完成！处理了 ${result.results.length} 个条目`,
                             "success"
-                        );
+                        )
                         if (result.errors && result.errors.length > 0) {
                             showMessage(
-                                `部分翻译失败: ${result.errors.slice(0, 5).join(", ")}${result.errors.length > 5 ? "..." : ""}`,
+                                `部分翻译失败: ${result.errors
+                                    .slice(0, 5)
+                                    .join(", ")}${
+                                    result.errors.length > 5 ? "..." : ""
+                                }`,
                                 "error"
-                            );
+                            )
                         }
-                        refreshData();
+                        refreshData()
                     } else {
-                        throw new Error(result.error || "批量翻译失败");
+                        throw new Error(result.error || "批量翻译失败")
                     }
                 } catch (error) {
-                    showMessage("批量翻译失败: " + error.message, "error");
+                    showMessage("批量翻译失败: " + error.message, "error")
                 }
             }
 
             // 关闭模态框
             function closeModal() {
-                document.getElementById("editModal").style.display = "none";
+                document.getElementById("editModal").style.display = "none"
             }
 
             // 显示消息弹窗
             function showMessage(message, type = "success") {
-                const modal = document.getElementById("messageModal");
-                const title = document.getElementById("messageTitle");
-                const icon = document.getElementById("messageIcon");
-                const text = document.getElementById("messageText");
-                const closeBtn = modal.querySelector(".close");
-                const confirmBtn = modal.querySelector("button");
+                const modal = document.getElementById("messageModal")
+                const title = document.getElementById("messageTitle")
+                const icon = document.getElementById("messageIcon")
+                const text = document.getElementById("messageText")
+                const closeBtn = modal.querySelector(".close")
+                const confirmBtn = modal.querySelector("button")
 
                 // 设置图标和标题
                 switch (type) {
                     case "success":
-                        title.textContent = "成功";
-                        icon.textContent = "✅";
-                        icon.style.color = "#28a745";
-                        break;
+                        title.textContent = "成功"
+                        icon.textContent = "✅"
+                        icon.style.color = "#28a745"
+                        break
                     case "error":
-                        title.textContent = "错误";
-                        icon.textContent = "❌";
-                        icon.style.color = "#dc3545";
-                        break;
+                        title.textContent = "错误"
+                        icon.textContent = "❌"
+                        icon.style.color = "#dc3545"
+                        break
                     case "warning":
-                        title.textContent = "警告";
-                        icon.textContent = "⚠️";
-                        icon.style.color = "#ffc107";
-                        break;
+                        title.textContent = "警告"
+                        icon.textContent = "⚠️"
+                        icon.style.color = "#ffc107"
+                        break
                     case "info":
-                        title.textContent = "信息";
-                        icon.textContent = "ℹ️";
-                        icon.style.color = "#17a2b8";
-                        break;
+                        title.textContent = "信息"
+                        icon.textContent = "ℹ️"
+                        icon.style.color = "#17a2b8"
+                        break
                     default:
-                        title.textContent = "提示";
-                        icon.textContent = "💬";
-                        icon.style.color = "#6c757d";
+                        title.textContent = "提示"
+                        icon.textContent = "💬"
+                        icon.style.color = "#6c757d"
                 }
 
-                text.textContent = message;
+                text.textContent = message
 
                 // 对于正在进行的操作（info类型），隐藏关闭按钮
                 if (type === "info") {
-                    closeBtn.style.display = "none";
-                    confirmBtn.style.display = "none";
+                    closeBtn.style.display = "none"
+                    confirmBtn.style.display = "none"
                 } else {
-                    closeBtn.style.display = "block";
-                    confirmBtn.style.display = "block";
+                    closeBtn.style.display = "block"
+                    confirmBtn.style.display = "block"
                 }
 
-                modal.style.display = "block";
+                modal.style.display = "block"
 
                 // 3秒后自动关闭（除了错误消息和info消息）
                 if (type !== "error" && type !== "info") {
@@ -1461,18 +1518,18 @@
 
             // 关闭消息弹窗
             function closeMessageModal() {
-                document.getElementById("messageModal").style.display = "none";
+                document.getElementById("messageModal").style.display = "none"
             }
 
             // 显示新增文件模态框
             function showAddFileModal() {
-                document.getElementById("newFileName").value = "";
-                document.getElementById("addFileModal").style.display = "block";
+                document.getElementById("newFileName").value = ""
+                document.getElementById("addFileModal").style.display = "block"
             }
 
             // 关闭新增文件模态框
             function closeAddFileModal() {
-                document.getElementById("addFileModal").style.display = "none";
+                document.getElementById("addFileModal").style.display = "none"
             }
 
             // 新增文件表单提交
@@ -1480,18 +1537,20 @@
                 document
                     .getElementById("addFileForm")
                     .addEventListener("submit", async function (e) {
-                        e.preventDefault();
-                        await createNewFile();
-                    });
-            });
+                        e.preventDefault()
+                        await createNewFile()
+                    })
+            })
 
             // 创建新文件
             async function createNewFile() {
-                const fileName = document.getElementById("newFileName").value.trim();
+                const fileName = document
+                    .getElementById("newFileName")
+                    .value.trim()
 
                 if (!fileName) {
-                    showMessage("请输入文件名", "error");
-                    return;
+                    showMessage("请输入文件名", "error")
+                    return
                 }
 
                 // 验证文件名格式（只允许字母、数字、连字符和下划线）
@@ -1499,45 +1558,125 @@
                     showMessage(
                         "文件名只能包含字母、数字、连字符和下划线",
                         "error"
-                    );
-                    return;
+                    )
+                    return
                 }
 
                 // 检查文件是否已存在
                 if (files.includes(fileName)) {
-                    showMessage("文件名已存在，请使用其他名称", "error");
-                    return;
+                    showMessage("文件名已存在，请使用其他名称", "error")
+                    return
                 }
 
                 try {
-                    showMessage(`正在创建文件 ${fileName}.json...`, "info");
+                    showMessage(`正在创建文件 ${fileName}.json...`, "info")
 
                     const response = await fetch(`${API_BASE}/create-file`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ fileName }),
-                    });
+                    })
 
-                    const result = await response.json();
+                    const result = await response.json()
 
                     if (response.ok && result.success) {
                         showMessage(
                             `成功在 ${result.createdCount} 个语言文件夹中创建了 ${fileName}.json`,
                             "success"
-                        );
-                        closeAddFileModal();
-                        
+                        )
+                        closeAddFileModal()
+
                         // 刷新数据
-                        await loadInitialData();
+                        await loadInitialData()
                     } else {
-                        throw new Error(result.error || "创建文件失败");
+                        throw new Error(result.error || "创建文件失败")
                     }
                 } catch (error) {
-                    showMessage("创建文件失败: " + error.message, "error");
+                    showMessage("创建文件失败: " + error.message, "error")
                 }
             }
 
-            
+            // 多选相关函数
+            function toggleSelectAll() {
+                const selectAllCheckbox = document.getElementById("selectAll")
+                const rowCheckboxes = document.querySelectorAll(".row-checkbox")
+                rowCheckboxes.forEach((checkbox) => {
+                    checkbox.checked = selectAllCheckbox.checked
+                })
+                updateSelectedCount()
+            }
+
+            function updateSelectedCount() {
+                const selectedCheckboxes = document.querySelectorAll(
+                    ".row-checkbox:checked"
+                )
+                const count = selectedCheckboxes.length
+                document.getElementById("selectedCount").textContent = count
+
+                // 显示/隐藏批量删除按钮
+                const batchDeleteBtn = document.getElementById("batchDeleteBtn")
+                batchDeleteBtn.style.display =
+                    count > 0 ? "inline-block" : "none"
+
+                // 更新全选框状态
+                const allCheckboxes = document.querySelectorAll(".row-checkbox")
+                const selectAllCheckbox = document.getElementById("selectAll")
+                if (allCheckboxes.length > 0) {
+                    selectAllCheckbox.checked = count === allCheckboxes.length
+                    selectAllCheckbox.indeterminate =
+                        count > 0 && count < allCheckboxes.length
+                }
+            }
+
+            function getSelectedIds() {
+                const selectedCheckboxes = document.querySelectorAll(
+                    ".row-checkbox:checked"
+                )
+                return Array.from(selectedCheckboxes).map((cb) =>
+                    parseInt(cb.value)
+                )
+            }
+
+            async function batchDelete() {
+                const selectedIds = getSelectedIds()
+                if (selectedIds.length === 0) {
+                    showMessage("请先选择要删除的翻译条目", "error")
+                    return
+                }
+
+                const confirmMsg = `确定要删除选中的 ${selectedIds.length} 个翻译条目吗？此操作不可恢复！`
+                if (!confirm(confirmMsg)) return
+
+                try {
+                    showMessage(
+                        `正在删除 ${selectedIds.length} 个翻译条目...`,
+                        "info"
+                    )
+
+                    const response = await fetch(`${API_BASE}/batch-delete`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ ids: selectedIds }),
+                    })
+
+                    const result = await response.json()
+
+                    if (response.ok && result.success) {
+                        showMessage(
+                            `成功删除 ${result.deletedCount} 个翻译条目`,
+                            "success"
+                        )
+                        // 重置全选框
+                        document.getElementById("selectAll").checked = false
+                        // 刷新数据
+                        await refreshData()
+                    } else {
+                        throw new Error(result.error || "批量删除失败")
+                    }
+                } catch (error) {
+                    showMessage("批量删除失败: " + error.message, "error")
+                }
+            }
         </script>
     </body>
 </html>
